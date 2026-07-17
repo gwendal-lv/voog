@@ -21,6 +21,7 @@ def main():
     os.makedirs("demo/base_osc_shapes", exist_ok=True)
     os.makedirs("demo/sequences", exist_ok=True)
 
+    sr=48000
     
     engine = AudioEngine()
 
@@ -71,12 +72,12 @@ def main():
     
     print(f"Multi-preset synthesis complete. Max amplitude: {np.max(np.abs(audio)):.4f}")
 
-    sf.write("demo/sequences/audio_multi_preset.wav", audio, 44100)
+    sf.write("demo/sequences/audio_multi_preset.wav", audio, sr)
     
     # Visualization
     print("Plotting multi-preset waveform envelope...")
     plt.figure(figsize=(12, 4))
-    librosa.display.waveshow(audio, sr=44100, color='blue')
+    librosa.display.waveshow(audio, sr=sr, color='blue')
     plt.title("VOOG Offline Synthesis Demo - Multi-Preset Sequence")
     plt.xlabel("Time (s)")
     plt.ylabel("Amplitude")
@@ -101,7 +102,7 @@ def main():
         seq_audio = seq_engine.render(events, total_duration)
         safe_name = patch_name.lower().replace(" ", "_")
         wav_path = f"demo/sequences/{safe_name}.wav"
-        sf.write(wav_path, seq_audio, 44100)
+        sf.write(wav_path, seq_audio, sr)
 
     # --- New Demos for individual waveforms ---
     # Requested: sin, square, tri, saw (3s note, at 220Hz and 1760Hz)
@@ -111,8 +112,7 @@ def main():
         "tri": "triangle",
         "saw": "saw"
     }
-    
-    sr = 44100
+
     test_cases = [
         {"freq": 220, "note": 57, "suffix": "_220Hz"},
         {"freq": 1760, "note": 93, "suffix": "_1760Hz"}
