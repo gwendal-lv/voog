@@ -1,35 +1,24 @@
 import numpy as np
-from config import SAMPLE_RATE, WAVETABLE_SIZE
+from config import SAMPLE_RATE
 
-# Pre-computed wavetables (band-limited via additive synthesis)
-_TABLES: dict[str, np.ndarray] = {}
-
-
-def _build_tables():
-    phase = np.linspace(0.0, 1.0, WAVETABLE_SIZE, endpoint=False, dtype=np.float64)
-    # Sine
-    _TABLES["sine"] = np.sin(2.0 * np.pi * phase)
-    # Saw – additive (enough harmonics for audible range)
-    saw = np.zeros(WAVETABLE_SIZE, dtype=np.float64)
-    for k in range(1, 64):
-        saw += ((-1.0) ** (k + 1)) * np.sin(2.0 * np.pi * k * phase) / k
-    _TABLES["saw"] = saw * (2.0 / np.pi)
-    # Square – odd harmonics
-    sq = np.zeros(WAVETABLE_SIZE, dtype=np.float64)
-    for k in range(1, 64, 2):
-        sq += np.sin(2.0 * np.pi * k * phase) / k
-    _TABLES["square"] = sq * (4.0 / np.pi)
-    # Triangle – odd harmonics, alternating sign
-    tri = np.zeros(WAVETABLE_SIZE, dtype=np.float64)
-    for k in range(1, 64, 2):
-        sign = (-1.0) ** ((k - 1) // 2)
-        tri += sign * np.sin(2.0 * np.pi * k * phase) / (k * k)
-    _TABLES["triangle"] = tri * (8.0 / (np.pi * np.pi))
+def _poly_blep(t: np.ndarray, dt: np.ndarray) -> np.ndarray:
+    """Vectorized PolyBLEP for band-limiting discontinuities."""
+    res = np.zeros_like(t)
+    
+    # Case: 0 <= t < dt
+    mask_low = t < dt
+    u = t[mask_low] / dt[mask_low]
+    res[mask_low] = u + u - u*u - 1.0
+    
+    # Case: 1 - dt < t < 1
+    mask_high = t > (1.0 - dt)
+    u = (t[mask_high] - 1.0) / dt[mask_high]
+    res[mask_high] = u*u + u + u + 1.0
+    
+    return res
 
 
-_build_tables()
-
-WAVEFORMS = list(_TABLES.keys())
+WAVEFORMS = ["sine", "saw", "square", "triangle"]
 
 
 class Oscillator:
@@ -39,7 +28,7 @@ class Oscillator:
         self.semitone: int = 0        # -12..+12
         self.detune: float = 0.0      # cents
         self.level: float = 1.0
-        self.pulse_width: float = 0.5  # for future PWM
+        self.pulse_width: float = 0.5
         self.phase: float = 0.0       # 0..1 accumulator
 
     def render(self, freq: float, n_samples: int, pitch_mod: np.ndarray | None = None) -> np.ndarray:
@@ -48,9 +37,6 @@ class Oscillator:
         f = freq * (2.0 ** self.octave) * (2.0 ** (self.semitone / 12.0)) * (2.0 ** (self.detune / 1200.0))
         if self.level <= 0.0:
             return np.zeros(n_samples, dtype=np.float64)
-
-        table = _TABLES.get(self.waveform, _TABLES["saw"])
-        ts = WAVETABLE_SIZE
 
         # Phase increment per sample
         if pitch_mod is not None:
@@ -61,18 +47,30 @@ class Oscillator:
             increments = np.full(n_samples, f / SAMPLE_RATE, dtype=np.float64)
 
         # Build phase ramp (vectorized)
-        # phases[i] is the phase at sample i, before adding increments[i]
         cumulative = np.cumsum(increments)
         phases = (self.phase + cumulative - increments) % 1.0
         self.phase = float((self.phase + cumulative[-1]) % 1.0)
 
-        # Wavetable lookup with linear interpolation
-        idx_f = phases * ts
-        idx_i = idx_f.astype(np.int32)
-        frac = idx_f - idx_i
-        idx_next = (idx_i + 1) % ts
-        idx_i = idx_i % ts
-        out = table[idx_i] * (1.0 - frac) + table[idx_next] * frac
+        # Parametric waveform generation
+        if self.waveform == "sine":
+            out = np.sin(2.0 * np.pi * phases)
+        elif self.waveform == "saw":
+            # Naive saw
+            out = 2.0 * phases - 1.0
+            # PolyBLEP correction for step at 0/1
+            out -= _poly_blep(phases, increments)
+        elif self.waveform == "square":
+            pw = self.pulse_width
+            # Naive square
+            out = np.where(phases < pw, 1.0, -1.0)
+            # PolyBLEP correction for steps at 0 and pulse_width
+            out += _poly_blep(phases, increments)
+            out -= _poly_blep((phases + 1.0 - pw) % 1.0, increments)
+        elif self.waveform == "triangle":
+            # Naive triangle (high-frequency content drops at 1/n^2, low aliasing)
+            out = 2.0 * np.abs(2.0 * phases - 1.0) - 1.0
+        else:
+            out = np.zeros(n_samples, dtype=np.float64)
 
         return out * self.level
 
