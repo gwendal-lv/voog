@@ -1,5 +1,5 @@
 import numpy as np
-from ..config import SAMPLE_RATE, CONTROL_RATE_DIVIDER
+from config import SAMPLE_RATE, CONTROL_RATE_DIVIDER
 
 _TWO_PI = 2.0 * np.pi
 

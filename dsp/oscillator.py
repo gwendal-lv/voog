@@ -1,5 +1,5 @@
 import numpy as np
-from ..config import SAMPLE_RATE, WAVETABLE_SIZE
+from config import SAMPLE_RATE, WAVETABLE_SIZE
 
 # Pre-computed wavetables (band-limited via additive synthesis)
 _TABLES: dict[str, np.ndarray] = {}

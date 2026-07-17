@@ -1,12 +1,12 @@
 import numpy as np
-from ..config import SAMPLE_RATE, NUM_OSCILLATORS, A4_FREQ
-from ..dsp.oscillator import Oscillator
-from ..dsp.envelope import ADSR
-from ..dsp.filter import MoogFilter
-from ..dsp.noise import NoiseGenerator
-from ..dsp.lfo import LFO
-from ..dsp.glide import Glide
-from ..patch.patch import Patch
+from config import SAMPLE_RATE, NUM_OSCILLATORS, A4_FREQ
+from dsp.oscillator import Oscillator
+from dsp.envelope import ADSR
+from dsp.filter import MoogFilter
+from dsp.noise import NoiseGenerator
+from dsp.lfo import LFO
+from dsp.glide import Glide
+from patch.patch import Patch
 
 
 def midi_to_freq(note: int) -> float:

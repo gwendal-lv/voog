@@ -6,3 +6,9 @@ dist/
 build/
 .env
 ~/.synth_patches/
+/.junie/
+
+/demo/
+demo
+
+/.idea/*

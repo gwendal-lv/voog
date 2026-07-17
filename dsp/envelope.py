@@ -1,5 +1,5 @@
 import numpy as np
-from ..config import SAMPLE_RATE, CONTROL_RATE_DIVIDER
+from config import SAMPLE_RATE, CONTROL_RATE_DIVIDER
 
 # Minimum time to avoid division by zero
 _MIN_TIME = 0.001

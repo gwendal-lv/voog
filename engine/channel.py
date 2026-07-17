@@ -1,7 +1,7 @@
 import numpy as np
-from ..config import MAX_VOICES
-from ..patch.patch import Patch
-from .voice_allocator import VoiceAllocator
+from config import MAX_VOICES
+from patch.patch import Patch
+from engine.voice_allocator import VoiceAllocator
 
 
 class Channel:

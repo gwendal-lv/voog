@@ -1,5 +1,5 @@
 import numpy as np
-from ..config import SAMPLE_RATE
+from config import SAMPLE_RATE
 
 
 class Glide:

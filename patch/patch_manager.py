@@ -1,7 +1,7 @@
 import json
 import os
-from .patch import Patch
-from .default_patches import DEFAULT_PATCHES
+from patch.patch import Patch
+from patch.default_patches import DEFAULT_PATCHES
 
 _PATCH_DIR = os.path.expanduser("~/.synth_patches")
 

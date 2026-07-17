@@ -1,4 +1,4 @@
-from .patch import Patch, OscParams, NoiseParams, FilterParams, ADSRParams, LFOParams, GlideParams
+from patch.patch import Patch, OscParams, NoiseParams, FilterParams, ADSRParams, LFOParams, GlideParams
 
 
 def init_patch() -> Patch:

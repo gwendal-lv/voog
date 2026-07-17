@@ -6,7 +6,7 @@ try:
 except ImportError:
     HAS_NUMBA = False
 
-from ..config import SAMPLE_RATE
+from config import SAMPLE_RATE
 
 
 if HAS_NUMBA:

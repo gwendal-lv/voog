@@ -1,5 +1,5 @@
-from ..config import MAX_VOICES
-from .voice import Voice
+from config import MAX_VOICES
+from engine.voice import Voice
 
 
 class VoiceAllocator:
