@@ -14,11 +14,12 @@ from patch.patch import Patch
 
 
 def main():
-    # Ensure demo directory exists
+    # Ensure demo directories exist
     demo_dir = Path("demo")
     if demo_dir.exists():
         shutil.rmtree(demo_dir)
-    os.makedirs("demo", exist_ok=True)
+    os.makedirs("demo/base_osc_shapes", exist_ok=True)
+    os.makedirs("demo/sequences", exist_ok=True)
 
     
     engine = AudioEngine()
@@ -65,28 +66,42 @@ def main():
     # Final tail
     total_duration = t + 2.0
     
-    print(f"Synthesizing {total_duration:.2f} seconds of audio...")
+    print(f"Synthesizing {total_duration:.2f} seconds of audio (multi-preset)...")
     audio = engine.render(events, total_duration)
     
-    print(f"Synthesis complete. Max amplitude: {np.max(np.abs(audio)):.4f}")
+    print(f"Multi-preset synthesis complete. Max amplitude: {np.max(np.abs(audio)):.4f}")
 
-    sf.write("demo/audio_demo.wav", audio, 44100)
+    sf.write("demo/sequences/audio_multi_preset.wav", audio, 44100)
     
     # Visualization
-    print("Plotting waveform envelope...")
+    print("Plotting multi-preset waveform envelope...")
     plt.figure(figsize=(12, 4))
     librosa.display.waveshow(audio, sr=44100, color='blue')
-    plt.title("VOOG Offline Synthesis Demo - Waveform Envelope")
+    plt.title("VOOG Offline Synthesis Demo - Multi-Preset Sequence")
     plt.xlabel("Time (s)")
     plt.ylabel("Amplitude")
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
     
-    # Save the plot or show it
-    output_plot = "demo/audio_demo_waveform.png"
+    # Save the plot
+    output_plot = "demo/sequences/audio_multi_preset_waveform.png"
     plt.savefig(output_plot)
     print(f"Waveform plot saved to {output_plot}")
     plt.close()
+
+    # --- Generate 19 more sequences with single default presets ---
+    print("\n>> Generating 19 single-preset sequences...")
+    for patch_name, patch in DEFAULT_PATCHES.items():
+        print(f"   Rendering sequence for patch: {patch_name}")
+        seq_engine = AudioEngine()
+        # Apply the patch to all channels used in the sequence
+        for ch in range(3):
+            seq_engine.channels[ch].set_patch(patch.copy())
+        
+        seq_audio = seq_engine.render(events, total_duration)
+        safe_name = patch_name.lower().replace(" ", "_")
+        wav_path = f"demo/sequences/{safe_name}.wav"
+        sf.write(wav_path, seq_audio, 44100)
 
     # --- New Demos for individual waveforms ---
     # Requested: sin, square, tri, saw (3s note, at 220Hz and 1760Hz)
@@ -132,7 +147,7 @@ def main():
             wf_audio = wf_engine.render(wf_events, 4.0)
             
             # 1. Save .wav
-            wav_path = f"demo/{label}{suffix}.wav"
+            wav_path = f"demo/base_osc_shapes/{label}{suffix}.wav"
             sf.write(wav_path, wf_audio, sr)
             print(f"   Saved {wav_path}")
             
@@ -167,7 +182,7 @@ def main():
             axes[2].grid(True, alpha=0.3)
             
             plt.tight_layout()
-            plot_path = f"demo/{label}{suffix}_analysis.png"
+            plot_path = f"demo/base_osc_shapes/{label}{suffix}_analysis.png"
             plt.savefig(plot_path)
             plt.close(fig) # Close to free memory
             print(f"   Saved {plot_path}")
