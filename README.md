@@ -32,48 +32,57 @@ See `audio_demo_minimal.py` for a complete example of offline rendering and visu
 
 ## Preset structure
 
-A VOOG preset (or "patch") is defined as a hierarchical dictionary. It consists of **41 parameters** in total. Below are the parameters available for customization:
+A VOOG preset (or "patch") is defined as a hierarchical dictionary. It consists of **41 parameters** in total. Below is the structure of a preset:
 
-### Global (2 parameters)
-- `name`: **Patch Name** — The display name of the preset.
-- `master_volume`: **Master Volume** — Global output volume level (0.0 to 1.0).
-
-### Oscillators (18 parameters)
-A list containing 3 oscillator configurations (6 parameters each).
-- `waveform`: **Waveform** — Shape of the oscillator: `sine`, `saw`, `square`, or `triangle`.
-- `octave`: **Octave** — Transposition in octaves (-2 to +2).
-- `semitone`: **Semitone** — Transposition in semitones (-12 to +12).
-- `detune`: **Detune** — Fine tuning in cents.
-- `level`: **Oscillator Level** — Individual volume of the oscillator (0.0 to 1.0).
-- `pulse_width`: **Pulse Width** — Duty cycle of the square wave (0.0 to 1.0).
-
-### Noise (2 parameters)
-- `noise_type`: **Noise Type** — Color of the noise generator: `white` or `pink`.
-- `level`: **Noise Level** — Volume of the noise generator (0.0 to 1.0).
-
-### Filter (4 parameters)
-- `cutoff`: **Cutoff Frequency** — Filter cutoff frequency in Hertz (Hz).
-- `resonance`: **Resonance** — Filter resonance or regeneration (0.0 to 1.0).
-- `env_amount`: **Envelope Amount** — Filter envelope modulation depth (in semitones).
-- `key_tracking`: **Keyboard Tracking** — How much the cutoff follows the note pitch (0.0 to 1.0).
-
-### Envelopes (8 parameters)
-Two standard ADSR envelopes (4 parameters each) for the filter (`filter_adsr`) and amplitude (`amp_adsr`).
-- `attack`: **Attack Time** — Time to reach peak level (seconds).
-- `decay`: **Decay Time** — Time to drop to sustain level (seconds).
-- `sustain`: **Sustain Level** — Constant level while note is held (0.0 to 1.0).
-- `release`: **Release Time** — Time to fade out after note release (seconds).
-
-### LFO (5 parameters)
-- `waveform`: **LFO Waveform** — Shape of the LFO: `sine`, `saw`, `square`, or `triangle`.
-- `rate`: **LFO Rate** — Frequency of modulation in Hertz (Hz).
-- `depth`: **Modulation Depth** — Intensity of the modulation effect (0.0 to 1.0).
-- `destination`: **Modulation Destination** — Target of the LFO: `filter`, `pitch`, or `amp`.
-- `key_sync`: **Key Sync** — If enabled, LFO phase resets on every new note (boolean).
-
-### Glide (2 parameters)
-- `time`: **Glide Time** — Portamento duration in seconds.
-- `mode`: **Glide Mode** — Transition mode: `off`, `always`, or `legato`.
+```
+{
+  "name": <string>,             // Name of the preset
+  "master_volume": <float>,     // Global volume level [0.0 to 1.0]
+  "oscillators": [              // List of 3 oscillators
+    {
+      "waveform": <string>,     // "sine", "saw", "square", or "triangle"
+      "octave": <int>,          // Octave offset [-2 to +2]
+      "semitone": <int>,        // Semitone offset [-12 to +12]
+      "detune": <float>,        // Fine tuning in cents [-100.0 to 100.0]
+      "level": <float>,         // Individual volume [0.0 to 1.0]
+      "pulse_width": <float>    // Pulse width for square wave [0.0 to 1.0]
+    }
+  ],
+  "noise": {                    // Noise generator
+    "noise_type": <string>,     // "white" or "pink"
+    "level": <float>            // Noise volume level [0.0 to 1.0]
+  },
+  "filter": {
+    "cutoff": <float>,          // Filter cutoff frequency in Hz [20.0 to 20000.0]
+    "resonance": <float>,       // Resonance level [0.0 to 1.0]
+    "env_amount": <float>,      // Filter envelope modulation depth in semitones [0.0 to 48.0]
+    "key_tracking": <float>     // Cutoff tracking of note pitch [0.0 to 1.0]
+  },
+  "filter_adsr": {              // Filter envelope
+    "attack": <float>,          // Attack time in seconds [min 0.001]
+    "decay": <float>,           // Decay time in seconds [min 0.001]
+    "sustain": <float>,         // Sustain level [0.0 to 1.0]
+    "release": <float>          // Release time in seconds [min 0.001]
+  },
+  "amp_adsr": {                 // Amplitude envelope
+    "attack": <float>,          // Attack time in seconds [min 0.001]
+    "decay": <float>,           // Decay time in seconds [min 0.001]
+    "sustain": <float>,         // Sustain level [0.0 to 1.0]
+    "release": <float>          // Release time in seconds [min 0.001]
+  },
+  "lfo": {
+    "waveform": <string>,       // LFO shape: "sine", "triangle", "saw", or "square"
+    "rate": <float>,            // Modulation rate in Hz [0.1 to 20.0]
+    "depth": <float>,           // Modulation intensity [0.0 to 1.0]
+    "destination": <string>,    // LFO target: "filter", "pitch", or "amp"
+    "key_sync": <bool>          // If true, LFO phase resets on every new note
+  },
+  "glide": {
+    "time": <float>,            // Portamento duration in seconds [0.0 to 2.0]
+    "mode": <string>            // Glide mode: "off", "always", or "legato"
+  }
+}
+```
 
 ## Architecture
 
