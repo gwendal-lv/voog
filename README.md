@@ -37,7 +37,6 @@ A VOOG preset (or "patch") is defined as a hierarchical dictionary. It consists 
 ```
 {
   "name": <string>,             // Name of the preset
-  "master_volume": <float>,     // Global volume level [0.0 to 1.0]
   "oscillators": [              // List of 3 oscillators
     {
       "waveform": <string>,     // "sine", "saw", "square", or "triangle"
@@ -52,7 +51,7 @@ A VOOG preset (or "patch") is defined as a hierarchical dictionary. It consists 
     "noise_type": <string>,     // "white" or "pink"
     "level": <float>            // Noise volume level [0.0 to 1.0]
   },
-  "filter": {
+  "filter": {                   // Low-pass filter
     "cutoff": <float>,          // Filter cutoff frequency in Hz [20.0 to 20000.0]
     "resonance": <float>,       // Resonance level [0.0 to 1.0]
     "env_amount": <float>,      // Filter envelope modulation depth in semitones [0.0 to 48.0]
@@ -81,6 +80,7 @@ A VOOG preset (or "patch") is defined as a hierarchical dictionary. It consists 
     "time": <float>,            // Portamento duration in seconds [0.0 to 2.0]
     "mode": <string>            // Glide mode: "off", "always", or "legato"
   }
+  "master_volume": <float>,     // Global volume level [0.0 to 1.0]
 }
 ```
 
